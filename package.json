@@ -4,7 +4,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "npm run dev && rollup -c"
+        "build": "npm run dev && rollup -c",
+        "dev": "npm run build"
     },
     "devDependencies": {
         "@inertiajs/vue3": "^2.0.0",
