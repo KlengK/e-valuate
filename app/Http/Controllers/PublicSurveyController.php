@@ -17,18 +17,17 @@ class PublicSurveyController extends Controller
      */
     public function start(Survey $survey): RedirectResponse
     {
-        // Ensure the survey has questions before starting
-        if ($survey->questions()->count() === 0) {
-            // Redirect to the homepage with an error message.
-            return redirect('/')->with('error', 'This survey is not yet available.');
+        // vvv THIS IS THE UPDATED PART vvv
+        // Only allow access to 'active' surveys with questions.
+        if ($survey->status !== 'active' || $survey->questions()->count() === 0) {
+            return redirect('/')->with('error', 'This survey is not currently available.');
         }
+        // ^^^ END OF UPDATE ^^^
 
-        // Create a new session for this survey attempt
         $session = $survey->surveySessions()->create([
             'session_uuid' => Str::uuid(),
         ]);
 
-        // Redirect to the first question
         return redirect()->route('public.survey.question.show', [
             'session_uuid' => $session->session_uuid,
             'order' => 1,
