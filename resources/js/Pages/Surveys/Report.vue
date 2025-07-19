@@ -129,7 +129,38 @@ const formatDate = (dateString) => {
 
                         <!-- Individual View -->
                         <div v-if="activeTab === 'individual'">
-                            <!-- ... (Individual View content remains the same) ... -->
+                            <div v-if="totalCompletions === 0" class="text-center text-gray-500">
+                                <p>No individual responses yet.</p>
+                            </div>
+                            <div v-else>
+                                <!-- Pagination Controls -->
+                                <div class="flex justify-between items-center pb-4 border-b">
+                                    <div class="flex items-center space-x-4">
+                                        <button @click="fetchIndividualResponse(currentResponseIndex - 1)" :disabled="currentResponseIndex === 0" class="p-1 rounded-full disabled:opacity-50 hover:bg-gray-100">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                        </button>
+                                        <p class="text-sm">Response {{ currentResponseIndex + 1 }} of {{ totalCompletions }}</p>
+                                        <button @click="fetchIndividualResponse(currentResponseIndex + 1)" :disabled="currentResponseIndex >= totalCompletions - 1" class="p-1 rounded-full disabled:opacity-50 hover:bg-gray-100">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                        </button>
+                                    </div>
+                                    <p class="text-sm text-gray-500">Completed: {{ currentSession ? formatDate(currentSession.completed_at) : 'Loading...' }}</p>
+                                </div>
+                                <!-- Response Details -->
+                                <div v-if="currentSession" class="mt-4">
+                                    <ul class="space-y-6">
+                                        <li v-for="response in currentSession.responses" :key="response.id">
+                                            <p class="font-semibold text-gray-800">{{ response.question.order }}. {{ response.question.question_text }}</p>
+                                            <div class="mt-2 pl-4 py-2 border-l-4 border-indigo-400">
+                                                <p class="text-lg text-gray-700">{{ response.answer_value }} <span v-if="response.question.question_type === 'rating'">★</span></p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div v-else class="text-center py-8 text-gray-500">
+                                    Loading response...
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
