@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\SurveySession;
 
 class SurveyController extends Controller
 {
@@ -69,6 +70,27 @@ class SurveyController extends Controller
         // ^^^ END OF NEW LOGIC ^^^
     }
 
+    /**
+     * Show the responses for an individual survey session.
+     */
+    
+
+    public function showSession(Survey $survey, \App\Models\SurveySession $session): \Inertia\Response
+    {
+        // Ensure the session belongs to the correct survey and user
+        if ($survey->user_id !== \Illuminate\Support\Facades\Auth::id() || $session->survey_id !== $survey->id) {
+            abort(403);
+        }
+
+        // Eager load the responses and their associated questions
+        $session->load('responses.question');
+
+        return \Inertia\Inertia::render('Surveys/Session', [
+            'survey' => $survey,
+            'session' => $session,
+        ]);
+    }
+
     public function show(Survey $survey): \Inertia\Response
     {
         // Ensure the logged-in user owns this survey
@@ -81,48 +103,68 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function report(Survey $survey): \Inertia\Response
+    public function report(Survey $survey): Response
     {
-        // Ensure the logged-in user owns this survey
-        if ($survey->user_id !== \Illuminate\Support\Facades\Auth::id()) {
+        if ($survey->user_id !== Auth::id()) {
             abort(403);
         }
 
-        // Eager load relationships for efficiency
-        $survey->load('questions.responses', 'surveySessions');
+        return Inertia::render('Surveys/Report', $this->getReportData($survey));
+    }
 
-        $totalCompletions = $survey->surveySessions()->whereNotNull('completed_at')->count();
+    /**
+     * Get a single individual response for the report page.
+     */
+    public function getIndividualResponse(Survey $survey, SurveySession $session): Response
+    {
+        if ($survey->user_id !== Auth::id() || $session->survey_id !== $survey->id) {
+            abort(403);
+        }
+        
+        // Get the base report data using our new helper method
+        $data = $this->getReportData($survey);
+        
+        // Load the specific session and add it to the data
+        $session->load('responses.question');
+        $data['individualResponse'] = $session;
+
+        return Inertia::render('Surveys/Report', $data);
+    }
+
+    // vvv THIS IS THE NEW HELPER METHOD vvv
+    /**
+     * Gathers and computes all data for a survey report.
+     */
+    private function getReportData(Survey $survey): array
+    {
+        $survey->load('questions');
+        $completedSessions = $survey->surveySessions()->whereNotNull('completed_at')->latest()->get();
 
         $reportData = $survey->questions->map(function ($question) {
-            $responses = $question->responses;
+            $responses = $question->responses()->get();
             $data = [
                 'id' => $question->id,
                 'question_text' => $question->question_text,
                 'question_type' => $question->question_type,
-                'total_responses' => $responses->count(),
                 'results' => [],
             ];
-
             if ($question->question_type === 'rating') {
                 $ratings = $responses->pluck('answer_value')->map(fn($val) => (int)$val);
-                $data['results'] = [
-                    'average' => $ratings->avg() ? round($ratings->avg(), 2) : 0,
-                    'counts' => $ratings->countBy(),
-                ];
+                $data['results'] = ['average' => $ratings->avg() ? round($ratings->avg(), 2) : 0];
             } elseif ($question->question_type === 'multiple_choice') {
                 $data['results'] = $responses->pluck('answer_value')->countBy();
             } elseif ($question->question_type === 'text') {
                 $data['results'] = $responses->pluck('answer_value')->all();
             }
-
             return $data;
         });
 
-        return \Inertia\Inertia::render('Surveys/Report', [
+        return [
             'survey' => $survey,
-            'totalCompletions' => $totalCompletions,
             'reportData' => $reportData,
-        ]);
+            'totalCompletions' => $completedSessions->count(),
+            'sessions' => $completedSessions->map(fn($s) => ['id' => $s->id, 'completed_at' => $s->completed_at]),
+        ];
     }
 
      public function updateStatus(Request $request, Survey $survey): RedirectResponse

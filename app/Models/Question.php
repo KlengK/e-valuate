@@ -16,10 +16,12 @@ class Question extends Model
         'question_type',
         'options',
         'order',
+        'is_required',
     ];
 
     protected $casts = [
         'options' => 'array',
+        'is_required' => 'boolean',
     ];
 
     public function survey(): BelongsTo

@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
     Route::get('/surveys/{survey}/share', [SurveyController::class, 'share'])->name('surveys.share');
     Route::patch('/surveys/{survey}/status', [SurveyController::class, 'updateStatus'])->name('surveys.status.update');
+    Route::get('/surveys/{survey}/report/individual/{session}', [SurveyController::class, 'getIndividualResponse'])->name('surveys.report.individual');
     Route::get('/surveys/{survey}/report', [SurveyController::class, 'report'])->name('surveys.report');
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
     Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');

@@ -96,6 +96,24 @@ const submit = () => {
                                 <InputLabel :for="'question_type_' + index" value="Question Type" />
                                 <SelectInput :id="'question_type_' + index" class="mt-1 block w-full" v-model="question.question_type" :options="questionTypes" required />
                             </div>
+                            <div>
+                                <InputLabel value="Is this question optional or required?" />
+                                <div class="mt-2 flex items-center space-x-3">
+                                    <button
+                                        type="button"
+                                        @click="question.is_required = !question.is_required"
+                                        :class="question.is_required ? 'bg-indigo-600' : 'bg-gray-200'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    >
+                                        <span
+                                            :class="question.is_required ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                        ></span>
+                                    </button>
+                                    <span class="text-sm text-gray-600" v-text="question.is_required ? 'Required' : 'Optional'"></span>
+                                </div>
+                                <InputError class="mt-2" :message="form.errors[`questions.${index}.is_required`]" />
+                            </div>                            
                             <div v-if="question.question_type === 'multiple_choice'" class="space-y-2 pl-4 border-l-2">
                                 <InputLabel value="Options" />
                                 <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="flex items-center space-x-2">

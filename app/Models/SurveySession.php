@@ -11,7 +11,7 @@ class SurveySession extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['survey_id', 'session_uuid'];
+     protected $fillable = ['survey_id', 'session_uuid', 'completed_at'];
 
     public function survey(): BelongsTo
     {
