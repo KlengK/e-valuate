@@ -67,6 +67,9 @@ const formatDate = (dateString) => {
                                         <Link :href="route('surveys.report', survey.id)" class="text-indigo-600 hover:text-indigo-900">
                                             View Report
                                         </Link>
+                                            <Link :href="route('surveys.share', survey.id)" class="text-indigo-600 hover:text-indigo-900">
+        Share
+    </Link>
                                     </td>
                                 </tr>
                             </tbody>

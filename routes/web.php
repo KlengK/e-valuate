@@ -27,6 +27,7 @@ Route::get('/', function () {
 // This is the corrected route group.
 Route::prefix('survey')->name('public.survey.')->group(function () {
     Route::get('/complete', [PublicSurveyController::class, 'complete'])->name('complete');
+    Route::get('/{survey}/closed', [\App\Http\Controllers\PublicSurveyController::class, 'closed'])->name('closed');
     Route::get('/{survey}', [PublicSurveyController::class, 'start'])->name('start');
     Route::get('/{session_uuid}/question/{order}', [PublicSurveyController::class, 'showQuestion'])->name('question.show');
     Route::post('/{session_uuid}/question/{order}', [PublicSurveyController::class, 'storeResponse'])->name('question.store');
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Survey Management
     Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
     Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
+    Route::get('/surveys/{survey}/share', [SurveyController::class, 'share'])->name('surveys.share');
     Route::patch('/surveys/{survey}/status', [SurveyController::class, 'updateStatus'])->name('surveys.status.update');
     Route::get('/surveys/{survey}/report', [SurveyController::class, 'report'])->name('surveys.report');
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');

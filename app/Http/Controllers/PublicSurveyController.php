@@ -17,12 +17,17 @@ class PublicSurveyController extends Controller
      */
     public function start(Survey $survey): RedirectResponse
     {
-        // vvv THIS IS THE UPDATED PART vvv
-        // Only allow access to 'active' surveys with questions.
+        
+        // First, check if the survey is closed.
+        if ($survey->status === 'closed') {
+            return redirect()->route('public.survey.closed', $survey);
+        }
+
+        // Then, check if it's active and has questions.
         if ($survey->status !== 'active' || $survey->questions()->count() === 0) {
             return redirect('/')->with('error', 'This survey is not currently available.');
         }
-        // ^^^ END OF UPDATE ^^^
+        
 
         $session = $survey->surveySessions()->create([
             'session_uuid' => Str::uuid(),
@@ -49,6 +54,18 @@ class PublicSurveyController extends Controller
             'session_uuid' => $session_uuid,
             'totalQuestions' => $survey->questions()->count()
         ]);
+    }
+
+    public function closed(Survey $survey): View
+    {
+        return view('public.survey.closed', [
+            'survey' => $survey,
+        ]);
+    }
+
+     public function complete(): View
+    {
+        return view('public.survey.complete');
     }
 
     /**
@@ -86,8 +103,5 @@ class PublicSurveyController extends Controller
     /**
      * Display the survey completion page.
      */
-    public function complete(): View
-    {
-        return view('public.survey.complete');
-    }
+   
 }

@@ -6,11 +6,12 @@ use App\Models\Survey;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth; // <-- ADD THIS LINE
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SurveyController extends Controller
 {
@@ -37,6 +38,37 @@ class SurveyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+        public function share(Survey $survey): Response
+    {
+        if ($survey->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $shareUrl = route('public.survey.start', $survey);
+        
+        // vvv THIS IS THE NEW LOGIC vvv
+
+        // Generate a PLAIN QR code without merging
+        $qrCode = QrCode::size(400)
+            ->format('svg')
+            ->errorCorrection('H')
+            ->color(0, 119, 190)
+            ->generate($shareUrl);
+
+        $qrCodeBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrCode);
+
+        // Get the public URL of the logo for the frontend
+        $logoUrl = asset('images/logo.png');
+
+        return Inertia::render('Surveys/Share', [
+            'survey' => $survey,
+            'shareUrl' => $shareUrl,
+            'qrCode' => $qrCodeBase64,
+            'logoUrl' => $logoUrl, // Pass the logo URL to the frontend
+        ]);
+        // ^^^ END OF NEW LOGIC ^^^
+    }
+
     public function show(Survey $survey): \Inertia\Response
     {
         // Ensure the logged-in user owns this survey

@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-// The import for AddQuestionForm has been removed.
-import { Head } from '@inertiajs/vue3';
+import UpdateStatusForm from './Partials/UpdateStatusForm.vue';
+import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({
     survey: Object,
@@ -22,9 +22,34 @@ defineProps({
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
                 <!-- Survey Details Card -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 border-b">
+                    <div class="p-6 text-gray-900">
                         <h3 class="text-lg font-medium">Survey Details</h3>
-                        <p class="mt-2 text-gray-600">{{ survey.description }}</p>
+                        <div class="mt-2 text-gray-600">
+                            <p>{{ survey.description }}</p>
+                            <p class="mt-2">
+                                <span class="font-semibold">Status:</span>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-800': survey.status === 'active',
+                                          'bg-yellow-100 text-yellow-800': survey.status === 'draft',
+                                          'bg-red-100 text-red-800': survey.status === 'closed'
+                                      }">
+                                    {{ survey.status }}
+                                </span>
+                            </p>
+                             <div class="mt-4">
+                                <Link :href="route('surveys.report', survey.id)" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+                                    View Report &rarr;
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update Status Card -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                       <UpdateStatusForm :survey="survey" />
                     </div>
                 </div>
 
@@ -46,8 +71,6 @@ defineProps({
                         </div>
                     </div>
                 </div>
-
-                <!-- The "Add Question Form" card has been completely removed from this page. -->
 
             </div>
         </div>
