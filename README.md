@@ -1,61 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+e-VALuate: Customer Satisfaction Survey System
+e-VALuate is a modern, gamified survey management system designed for the Valenzuela City Public Library. It provides a simple and engaging way for patrons to give feedback while offering powerful creation and analytics tools for library staff.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+✨ Features
+Admin Dashboard: A secure, Vue.js-powered single-page application for managing surveys.
 
-## About Laravel
+Unified Survey & Question Creation: Create a survey and all its questions on a single, dynamic form.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Survey Status Control: Easily manage the lifecycle of surveys by switching them between Draft, Active, and Closed states.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Gamified Public Surveys: A mobile-first, one-question-per-page experience for patrons with progress bars and a clean UI.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Multiple Question Types: Supports star ratings, open-text answers, and multiple-choice questions.
 
-## Learning Laravel
+Shareable Links & QR Codes: Generate shareable URLs and downloadable QR codes for each survey to use on flyers and posters.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Results & Analytics: A dedicated reporting page for each survey showing total completions and a breakdown of answers per question.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+🛠️ Tech Stack
+Backend: PHP, Laravel
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Frontend: Vue.js, Inertia.js, Tailwind CSS
 
-## Laravel Sponsors
+Database: MySQL
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Development Environment: Laravel Herd
 
-### Premium Partners
+Production Server: Ubuntu, Apache2
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+📋 Prerequisites
+Before you begin, ensure you have the following software installed on your local machine:
 
-## Contributing
+Laravel Herd (or another local server environment with PHP 8.2+, Composer, and Node.js)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+A MySQL database server (included with Herd Pro, or you can use a separate installation like XAMPP or a standalone server).
 
-## Code of Conduct
+Git for version control.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+🚀 Installation & Setup
+Follow these steps to get your local development environment running.
 
-## Security Vulnerabilities
+1. Clone the Repository
+Open your terminal and clone the project to your local machine.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+git clone <your-repository-url> e-valuate
+cd e-valuate
 
-## License
+2. Install Dependencies
+Install all the required PHP and Node.js packages.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Install PHP dependencies
+composer install
+
+# Install Node.js dependencies
+npm install
+
+3. Configure Your Environment
+Create your local environment configuration file and generate an application key.
+
+# Create the .env file from the example
+cp .env.example .env
+
+# Generate a new application key
+php artisan key:generate
+
+4. Set Up the Database
+Open your preferred MySQL client (e.g., DBeaver, MySQL Workbench).
+
+Create a new, empty database named e_valuate.
+
+Open the .env file in your code editor and update the database credentials:
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=e_valuate
+DB_USERNAME=root
+DB_PASSWORD=
+
+5. Run Database Migrations
+This command will create all the necessary tables in your database.
+
+php artisan migrate
+
+6. Run the Development Server
+Compile the frontend assets and start the Vite development server.
+
+npm run dev
+
+Your Laravel application will be served automatically by Herd at http://e-valuate.test.
+
+📖 Usage Guide
+Navigate to http://e-valuate.test in your browser.
+
+Click the "Register" link to create a new admin account.
+
+After registering, you will be redirected to the dashboard.
+
+Click on the "Surveys" navigation link.
+
+Click "Create Survey" to build your first survey and add its questions.
+
+Once created, you can manage the survey's status, view reports, or generate a shareable link and QR code from the survey list.
