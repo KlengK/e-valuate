@@ -13,6 +13,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\SurveySession;
+use App\Exports\SurveySummaryExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SurveyController extends Controller
 {
@@ -131,6 +134,34 @@ class SurveyController extends Controller
         return Inertia::render('Surveys/Report', $data);
     }
 
+/**
+     * Export the survey summary report as a CSV file.
+     */
+    public function exportSummaryCsv(Survey $survey)
+    {
+        if ($survey->user_id !== \Illuminate\Support\Facades\Auth::id()) {
+            abort(403);
+        }
+        return Excel::download(new SurveySummaryExport($survey), "survey-{$survey->id}-summary.csv");
+    }
+
+    /**
+     * Export the survey summary report as a PDF file.
+     */
+    public function exportSummaryPdf(Survey $survey)
+    {
+        if ($survey->user_id !== \Illuminate\Support\Facades\Auth::id()) {
+            abort(403);
+        }
+        
+        // We reuse our private helper method to get the report data
+        $data = $this->getReportData($survey);
+
+        $pdf = Pdf::loadView('public.survey.summary_pdf', $data);
+        
+        return $pdf->download("survey-{$survey->id}-summary.pdf");
+    }
+
     // vvv THIS IS THE NEW HELPER METHOD vvv
     /**
      * Gathers and computes all data for a survey report.
@@ -185,34 +216,37 @@ class SurveyController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // vvv THIS IS THE FIX vvv
+        // Added 'is_required' to the validation rules.
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
             'questions.*.question_type' => 'required|string|in:rating,text,multiple_choice',
+            'questions.*.is_required' => 'required|boolean',
             'questions.*.options' => 'nullable|array|required_if:questions.*.question_type,multiple_choice',
             'questions.*.options.*' => 'string|max:255',
         ]);
 
-        // Use a transaction to ensure all or nothing is saved
         DB::transaction(function () use ($validated, $request) {
-            // 1. Create the Survey
             $survey = $request->user()->surveys()->create([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
             ]);
 
-            // 2. Loop through and create each question
             foreach ($validated['questions'] as $index => $questionData) {
+                // Added 'is_required' to the data being saved.
                 $survey->questions()->create([
                     'question_text' => $questionData['question_text'],
                     'question_type' => $questionData['question_type'],
+                    'is_required' => $questionData['is_required'],
                     'options' => $questionData['options'] ?? null,
                     'order' => $index + 1,
                 ]);
             }
         });
+        // ^^^ END OF FIX ^^^
 
         return Redirect::route('surveys.index')->with('success', 'Survey and questions created successfully.');
     }

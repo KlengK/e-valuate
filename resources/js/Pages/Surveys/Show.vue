@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import UpdateStatusForm from './Partials/UpdateStatusForm.vue';
+import UpdateStatusForm from './Partials/UpdateStatusForm.vue'; // <-- Import the form
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({

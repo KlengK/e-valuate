@@ -73,28 +73,39 @@ class PublicSurveyController extends Controller
      */
     public function storeResponse(Request $request, string $session_uuid, int $order): RedirectResponse
     {
-        $validated = $request->validate([
+        $session = SurveySession::where('session_uuid', $session_uuid)->firstOrFail();
+        $question = $session->survey->questions()->where('order', $order)->firstOrFail();
+
+        // vvv THIS IS THE FIX vvv
+        // The validation rule for 'answer_value' is now more explicit.
+        $validationRules = [
             'question_id' => 'required|exists:questions,id',
-            'answer_value' => 'required|string',
+        ];
+
+        if ($question->is_required) {
+            $validationRules['answer_value'] = 'required|string';
+        } else {
+            $validationRules['answer_value'] = 'nullable|string';
+        }
+
+        $validated = $request->validate($validationRules);
+        // ^^^ END OF FIX ^^^
+
+        // Save the response. If optional and unanswered, save "Skipped".
+        $session->responses()->create([
+            'question_id' => $validated['question_id'],
+            'answer_value' => $validated['answer_value'] ?? 'Skipped',
         ]);
 
-        $session = SurveySession::where('session_uuid', $session_uuid)->firstOrFail();
-
-        // Save the response to the database
-        $session->responses()->create($validated);
-
-        // Determine if there is a next question
         $nextQuestionOrder = $order + 1;
         $nextQuestionExists = $session->survey->questions()->where('order', $nextQuestionOrder)->exists();
 
         if ($nextQuestionExists) {
-            // If yes, redirect to the next question
             return redirect()->route('public.survey.question.show', [
                 'session_uuid' => $session_uuid,
                 'order' => $nextQuestionOrder,
             ]);
         } else {
-            // If no, mark the session as complete and redirect to the thank you page
             $session->update(['completed_at' => now()]);
             return redirect()->route('public.survey.complete');
         }

@@ -48,6 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/surveys/{survey}/status', [SurveyController::class, 'updateStatus'])->name('surveys.status.update');
     Route::get('/surveys/{survey}/report/individual/{session}', [SurveyController::class, 'getIndividualResponse'])->name('surveys.report.individual');
     Route::get('/surveys/{survey}/report', [SurveyController::class, 'report'])->name('surveys.report');
+    Route::get('/surveys/{survey}/report/export-summary-csv', [SurveyController::class, 'exportSummaryCsv'])->name('surveys.report.export.summary_csv');
+    Route::get('/surveys/{survey}/report/export-summary-pdf', [SurveyController::class, 'exportSummaryPdf'])->name('surveys.report.export.summary_pdf');
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
     Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
 
