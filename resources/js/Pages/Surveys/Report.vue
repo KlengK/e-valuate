@@ -2,7 +2,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PieChart from '@/Components/PieChart.vue';
 import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 
@@ -78,17 +77,15 @@ const formatDate = (dateString) => {
                         <span class="inline-flex rounded-md">
                             <button type="button" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
                                 Export Options
-                                <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                                <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                             </button>
                         </span>
                     </template>
                     <template #content>
-                        <a :href="route('surveys.report.export.summary_csv', survey.id)" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 transition duration-150 ease-in-out">
+                        <a :href="route('surveys.report.export.summary_csv', { survey: survey.id })" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 transition duration-150 ease-in-out">
                             Export Summary (CSV)
                         </a>
-                        <a :href="route('surveys.report.export.summary_pdf', survey.id)" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 transition duration-150 ease-in-out">
+                        <a :href="route('surveys.report.export.summary_pdf', { survey: survey.id })" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 transition duration-150 ease-in-out">
                             Export Summary (PDF)
                         </a>
                     </template>
@@ -118,24 +115,29 @@ const formatDate = (dateString) => {
                     <div class="p-6">
                         <!-- Summary View -->
                         <div v-if="activeTab === 'summary'" class="space-y-6">
-                           <div v-for="question in reportData" :key="question.id" class="p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-                                <h4 class="font-semibold text-gray-800 dark:text-gray-200">{{ question.question_text }}</h4>
-                                <div class="mt-2">
-                                    <div v-if="question.question_type === 'rating'">
-                                        <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ question.results.average }} ★ <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Average Rating</span></p>
-                                    </div>
-                                    <div v-else-if="question.question_type === 'multiple_choice'">
-                                        <PieChart v-if="Object.keys(question.results).length > 0" :chart-data="formatPieChartData(question.results)" />
-                                        <p v-else class="text-sm text-gray-500 dark:text-gray-400">No responses for this question yet.</p>
-                                    </div>
-                                    <div v-else-if="question.question_type === 'text'">
-                                        <ul class="space-y-2 list-disc list-inside text-sm">
-                                            <li v-for="(answer, index) in question.results.slice(0, 5)" :key="index" class="text-gray-600 dark:text-gray-400">{{ answer }}</li>
-                                            <li v-if="question.results.length > 5" class="text-gray-500 dark:text-gray-400 italic">...and {{ question.results.length - 5 }} more.</li>
-                                        </ul>
+                           <div v-if="totalCompletions > 0">
+                               <div v-for="question in reportData" :key="question.id" class="p-4 border border-gray-200 dark:border-gray-700 rounded-md">
+                                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">{{ question.question_text }}</h4>
+                                    <div class="mt-2">
+                                        <div v-if="question.question_type === 'rating'">
+                                            <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ question.results.average }} ★ <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Average Rating</span></p>
+                                        </div>
+                                        <div v-else-if="question.question_type === 'multiple_choice'">
+                                            <PieChart v-if="Object.keys(question.results).length > 0" :chart-data="formatPieChartData(question.results)" />
+                                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">No responses for this question in this period.</p>
+                                        </div>
+                                        <div v-else-if="question.question_type === 'text'">
+                                            <ul class="space-y-2 list-disc list-inside text-sm">
+                                                <li v-for="(answer, index) in question.results.slice(0, 5)" :key="index" class="text-gray-600 dark:text-gray-400">{{ answer }}</li>
+                                                <li v-if="question.results.length > 5" class="text-gray-500 dark:text-gray-400 italic">...and {{ question.results.length - 5 }} more.</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                           </div>
+                           <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+                               No responses found for the selected period.
+                           </div>
                         </div>
 
                         <!-- Individual View -->

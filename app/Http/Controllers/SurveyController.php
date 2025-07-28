@@ -16,6 +16,7 @@ use App\Models\SurveySession;
 use App\Exports\SurveySummaryExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class SurveyController extends Controller
 {
@@ -106,12 +107,11 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function report(Survey $survey): Response
+    public function report(Survey $survey)
     {
         if ($survey->user_id !== Auth::id()) {
             abort(403);
         }
-
         return Inertia::render('Surveys/Report', $this->getReportData($survey));
     }
 
@@ -139,7 +139,7 @@ class SurveyController extends Controller
      */
     public function exportSummaryCsv(Survey $survey)
     {
-        if ($survey->user_id !== \Illuminate\Support\Facades\Auth::id()) {
+        if ($survey->user_id !== Auth::id()) {
             abort(403);
         }
         return Excel::download(new SurveySummaryExport($survey), "survey-{$survey->id}-summary.csv");
@@ -168,11 +168,11 @@ class SurveyController extends Controller
      */
     private function getReportData(Survey $survey): array
     {
-        $survey->load('questions');
+        $survey->load('questions.responses', 'surveySessions');
         $completedSessions = $survey->surveySessions()->whereNotNull('completed_at')->latest()->get();
 
         $reportData = $survey->questions->map(function ($question) {
-            $responses = $question->responses()->get();
+            $responses = $question->responses;
             $data = [
                 'id' => $question->id,
                 'question_text' => $question->question_text,

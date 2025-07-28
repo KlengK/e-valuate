@@ -16,80 +16,36 @@ class SurveySummaryExport implements FromCollection, WithHeadings, WithMapping
         $this->survey = $survey;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
     public function collection()
     {
         return $this->survey->questions()->with('responses')->get();
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
-        return [
-            'Question Order',
-            'Question Text',
-            'Question Type',
-            'Result Type',
-            'Result Value',
-        ];
+        return [ 'Question Order', 'Question Text', 'Question Type', 'Result Type', 'Result Value' ];
     }
 
-    /**
-     * @param mixed $question
-     *
-     * @return array
-     */
     public function map($question): array
     {
         $rows = [];
-
         if ($question->question_type === 'rating') {
             $ratings = $question->responses->pluck('answer_value')->map(fn($val) => (int)$val);
             $average = $ratings->avg() ? round($ratings->avg(), 2) : 0;
-            $rows[] = [
-                $question->order,
-                $question->question_text,
-                $question->question_type,
-                'Average Rating',
-                $average,
-            ];
+            $rows[] = [ $question->order, $question->question_text, $question->question_type, 'Average Rating', $average ];
         } elseif ($question->question_type === 'multiple_choice') {
             $counts = $question->responses->pluck('answer_value')->countBy();
             foreach ($counts as $option => $count) {
-                $rows[] = [
-                    $question->order,
-                    $question->question_text,
-                    $question->question_type,
-                    $option,
-                    $count,
-                ];
+                $rows[] = [ $question->order, $question->question_text, $question->question_type, $option, $count ];
             }
         } elseif ($question->question_type === 'text') {
             foreach ($question->responses as $response) {
-                 $rows[] = [
-                    $question->order,
-                    $question->question_text,
-                    $question->question_type,
-                    'Individual Response',
-                    $response->answer_value,
-                ];
+                 $rows[] = [ $question->order, $question->question_text, $question->question_type, 'Individual Response', $response->answer_value ];
             }
         }
-        
         if (empty($rows)) {
-            $rows[] = [
-                $question->order,
-                $question->question_text,
-                $question->question_type,
-                'No Responses',
-                '',
-            ];
+            $rows[] = [ $question->order, $question->question_text, $question->question_type, 'No Responses', '' ];
         }
-
         return $rows;
     }
 }
