@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSurveyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SurveyController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -36,12 +37,15 @@ Route::prefix('survey')->name('public.survey.')->group(function () {
 
 // --- ADMIN & AUTHENTICATED ROUTES ---
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Survey Management
+    Route::post('/surveys/{survey}/duplicate', [SurveyController::class, 'duplicate'])->name('surveys.duplicate');
+    Route::get('/surveys/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
+    Route::put('/surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
     Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
     Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
     Route::get('/surveys/{survey}/share', [SurveyController::class, 'share'])->name('surveys.share');

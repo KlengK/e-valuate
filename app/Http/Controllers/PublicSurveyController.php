@@ -76,25 +76,27 @@ class PublicSurveyController extends Controller
         $session = SurveySession::where('session_uuid', $session_uuid)->firstOrFail();
         $question = $session->survey->questions()->where('order', $order)->firstOrFail();
 
-        // vvv THIS IS THE FIX vvv
-        // The validation rule for 'answer_value' is now more explicit.
         $validationRules = [
             'question_id' => 'required|exists:questions,id',
         ];
 
         if ($question->is_required) {
-            $validationRules['answer_value'] = 'required|string';
+            // If it's a checkbox, the answer must be an array. Otherwise, a string.
+            $validationRules['answer_value'] = $question->question_type === 'checkbox' ? 'required|array' : 'required|string';
         } else {
-            $validationRules['answer_value'] = 'nullable|string';
+            $validationRules['answer_value'] = $question->question_type === 'checkbox' ? 'nullable|array' : 'nullable|string';
         }
 
         $validated = $request->validate($validationRules);
-        // ^^^ END OF FIX ^^^
 
-        // Save the response. If optional and unanswered, save "Skipped".
+        $answer = $validated['answer_value'] ?? 'Skipped';
+        if (is_array($answer)) {
+            $answer = implode(', ', $answer);
+        }
+
         $session->responses()->create([
             'question_id' => $validated['question_id'],
-            'answer_value' => $validated['answer_value'] ?? 'Skipped',
+            'answer_value' => $answer,
         ]);
 
         $nextQuestionOrder = $order + 1;

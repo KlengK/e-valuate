@@ -12,13 +12,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+            /* vvv THIS IS THE NEW PART vvv */
+            /* You can replace this URL with your own background image */
+            background-image: url("{{ asset('images/background.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* ^^^ END OF NEW PART ^^^ */
+        }
+        /* Custom styles for star rating */
         .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 0.5rem; }
         .star-rating input[type="radio"] { display: none; }
         .star-rating label { cursor: pointer; color: #d1d5db; transition: color 0.2s; }
-        .star-rating label:hover,
-        .star-rating label:hover ~ label,
-        .star-rating input[type="radio"]:checked ~ label { color: #f59e0b; }
+        .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input[type="radio"]:checked ~ label { color: #f59e0b; }
+
+        /* vvv ADD THIS OVERLAY STYLE vvv */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+            z-index: -1; /* Place it behind the content */
+        }
     </style>
 </head>
 <body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
@@ -34,7 +54,7 @@
                 <p class="text-sm font-medium text-indigo-600">{{ round((($question->order - 1) / $totalQuestions) * 100) }}% Complete</p>
             </div>
             <div class="w-full bg-slate-200 rounded-full h-2.5">
-                <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: {{ (($question->order -1) / $totalQuestions) * 100 }}%"></div>
+                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ (($question->order -1) / $totalQuestions) * 100 }}%"></div>
             </div>
         </div>
 
@@ -50,6 +70,10 @@
                     @endif
                 </legend>
 
+                 @if($question->description)
+                    <p class="text-center text-sm text-gray-500 mt-2 mb-6">{{ $question->description }}</p>
+                @endif
+
                 <div class="space-y-4">
                     @if ($question->question_type === 'rating')
                         <div class="star-rating">
@@ -61,21 +85,41 @@
                             @endfor
                         </div>
                     @elseif ($question->question_type === 'text')
-                        <textarea name="answer_value" rows="5" class="mt-1 block w-full border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" placeholder="Type your answer here..." @if($question->is_required) required @endif></textarea>
-                    @elseif ($question->question_type === 'multiple_choice' && !empty($question->options))
+                        <textarea name="answer_value" rows="5" class="mt-1 block w-full border-slate-300 rounded-md shadow-sm" placeholder="Type your answer here..." @if($question->is_required) required @endif></textarea>
+                    @elseif ($question->question_type === 'multiple_choice')
                         @foreach ($question->options as $option)
                             <div>
                                 <input type="radio" id="option_{{ Str::slug($option) }}" name="answer_value" value="{{ $option }}" class="hidden peer" @if($question->is_required) required @endif>
-                                <label for="option_{{ Str::slug($option) }}" class="block p-4 border-2 border-slate-300 rounded-lg cursor-pointer transition-all duration-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 hover:bg-slate-100">
+                                <label for="option_{{ Str::slug($option) }}" class="block p-4 border-2 border-slate-300 rounded-lg cursor-pointer peer-checked:border-indigo-600 hover:bg-slate-100">
                                     <span class="text-base sm:text-lg font-medium text-slate-700">{{ $option }}</span>
                                 </label>
                             </div>
                         @endforeach
+                    
+                    <!-- vvv THIS IS THE NEW PART vvv -->
+                    @elseif ($question->question_type === 'checkbox')
+                        @foreach ($question->options as $option)
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="checkbox_{{ Str::slug($option) }}" name="answer_value[]" value="{{ $option }}" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                </div>
+                                <div class="ml-3 text-sm leading-6">
+                                    <label for="checkbox_{{ Str::slug($option) }}" class="font-medium text-gray-900">{{ $option }}</label>
+                                </div>
+                            </div>
+                        @endforeach
+                    <!-- ^^^ END OF NEW PART ^^^ -->
+
                     @endif
                 </div>
             </fieldset>
 
-            <div class="mt-8 text-center">
+            <div class="mt-8 flex flex-col-reverse sm:flex-row items-center justify-center gap-4">
+                @if ($question->order > 1)
+                    <a href="{{ route('public.survey.question.show', ['session_uuid' => $session_uuid, 'order' => $question->order - 1]) }}" class="w-full sm:w-auto text-center font-bold text-lg py-3 px-8 sm:px-12 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors duration-300">
+                        Previous
+                    </a>
+                @endif
                 <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white font-bold text-lg py-3 px-8 sm:px-12 rounded-lg hover:bg-indigo-700 transition-colors duration-300">
                     @if ($question->order == $totalQuestions)
                         Finish Survey
@@ -85,10 +129,6 @@
                 </button>
             </div>
         </form>
-
-        <footer class="text-center mt-8">
-            <p class="text-sm text-slate-400">Powered by e-VALuate</p>
-        </footer>
     </main>
 
 </body>

@@ -17,6 +17,7 @@ use App\Exports\SurveySummaryExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class SurveyController extends Controller
 {
@@ -186,6 +187,10 @@ class SurveyController extends Controller
                 $data['results'] = $responses->pluck('answer_value')->countBy();
             } elseif ($question->question_type === 'text') {
                 $data['results'] = $responses->pluck('answer_value')->all();
+            } elseif ($question->question_type === 'checkbox') {
+                $data['results'] = $responses->pluck('answer_value')
+                    ->flatMap(fn($answer) => explode(', ', $answer))
+                    ->countBy();
             }
             return $data;
         });
@@ -213,19 +218,109 @@ class SurveyController extends Controller
 
         return Redirect::back()->with('success', 'Survey status updated.');
     }
+    public function duplicate(Survey $survey): RedirectResponse
+    {
+        if ($survey->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        DB::transaction(function () use ($survey) {
+            // 1. Replicate the survey model
+            $newSurvey = $survey->replicate();
+            
+            // 2. Modify the new survey's details
+            $newSurvey->title = $survey->title . ' (Copy)';
+            $newSurvey->status = 'draft'; // Always default a copy to draft
+            $newSurvey->created_at = now();
+            $newSurvey->updated_at = now();
+            $newSurvey->save();
+
+            // 3. Replicate each question associated with the original survey
+            foreach ($survey->questions as $question) {
+                $newQuestion = $question->replicate();
+                $newQuestion->survey_id = $newSurvey->id;
+                $newQuestion->save();
+            }
+        });
+
+        return Redirect::route('surveys.index')->with('success', 'Survey duplicated successfully.');
+    }
+
+
+    public function edit(Survey $survey): Response
+    {
+        if ($survey->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $survey->load('questions');
+
+        return Inertia::render('Surveys/Edit', [
+            'survey' => $survey,
+        ]);
+    }
+        
+        public function update(Request $request, Survey $survey): RedirectResponse
+    {
+        if ($survey->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'questions' => 'required|array|min:1',
+            'questions.*.id' => 'nullable|exists:questions,id',
+            'questions.*.question_text' => 'required|string',
+            'questions.*.description' => 'nullable|string',            
+            'questions.*.question_type' => 'required|string|in:rating,text,multiple_choice,checkbox',
+            'questions.*.is_required' => 'required|boolean',
+            'questions.*.options' => 'nullable|array|required_if:questions.*.question_type,multiple_choice|required_if:questions.*.question_type,checkbox',
+            'questions.*.options.*' => 'string|max:255',
+        ]);
+
+        DB::transaction(function () use ($validated, $survey) {
+            // 1. Update the Survey's main details
+            $survey->update([
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+            ]);
+
+            $incomingQuestionIds = collect($validated['questions'])->pluck('id')->filter();
+
+            // 2. Delete questions that were removed from the form
+            $survey->questions()->whereNotIn('id', $incomingQuestionIds)->delete();
+
+            // 3. Update existing questions and create new ones
+            foreach ($validated['questions'] as $index => $questionData) {
+                $survey->questions()->updateOrCreate(
+                    ['id' => $questionData['id'] ?? null], // Match by ID or create if null
+                    [
+                        'question_text' => $questionData['question_text'],
+                        'description' => $questionData['description'] ?? null,
+                        'question_type' => $questionData['question_type'],
+                        'is_required' => $questionData['is_required'],
+                        'options' => $questionData['options'] ?? null,
+                        'order' => $index + 1,
+                    ]
+                );
+            }
+        });
+
+        return Redirect::route('surveys.show', $survey)->with('success', 'Survey updated successfully.');
+    }
 
     public function store(Request $request): RedirectResponse
     {
-        // vvv THIS IS THE FIX vvv
-        // Added 'is_required' to the validation rules.
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
-            'questions.*.question_type' => 'required|string|in:rating,text,multiple_choice',
+            'questions.*.description' => 'nullable|string',
+            'questions.*.question_type' => 'required|string|in:rating,text,multiple_choice,checkbox',
             'questions.*.is_required' => 'required|boolean',
-            'questions.*.options' => 'nullable|array|required_if:questions.*.question_type,multiple_choice',
+            'questions.*.options' => 'nullable|array|required_if:questions.*.question_type,multiple_choice|required_if:questions.*.question_type,checkbox',
             'questions.*.options.*' => 'string|max:255',
         ]);
 
@@ -239,6 +334,7 @@ class SurveyController extends Controller
                 // Added 'is_required' to the data being saved.
                 $survey->questions()->create([
                     'question_text' => $questionData['question_text'],
+                    'description' => $questionData['description'] ?? null,
                     'question_type' => $questionData['question_type'],
                     'is_required' => $questionData['is_required'],
                     'options' => $questionData['options'] ?? null,

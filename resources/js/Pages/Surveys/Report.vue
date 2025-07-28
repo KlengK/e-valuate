@@ -19,6 +19,37 @@ const props = defineProps({
 const activeTab = ref('summary');
 const currentResponseIndex = ref(0);
 
+const textQuestionPages = ref({});
+const itemsPerPage = 5;
+
+// Initialize the pager state when the component receives data
+watch(() => props.reportData, (newReportData) => {
+    if (newReportData) {
+        newReportData.forEach(q => {
+            if (q.question_type === 'text') {
+                if (!textQuestionPages.value[q.id]) {
+                    textQuestionPages.value[q.id] = 1; // Default to page 1
+                }
+            }
+        });
+    }
+}, { immediate: true });
+
+const paginatedTextResults = (question) => {
+    const page = textQuestionPages.value[question.id] || 1;
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return question.results.slice(start, end);
+};
+
+const totalTextPages = (question) => {
+    return Math.ceil(question.results.length / itemsPerPage);
+};
+
+const changeTextPage = (questionId, direction) => {
+    textQuestionPages.value[questionId] += direction;
+};
+
 const formatPieChartData = (results) => {
     const labels = Object.keys(results);
     const data = Object.values(results);
@@ -126,11 +157,28 @@ const formatDate = (dateString) => {
                                             <PieChart v-if="Object.keys(question.results).length > 0" :chart-data="formatPieChartData(question.results)" />
                                             <p v-else class="text-sm text-gray-500 dark:text-gray-400">No responses for this question in this period.</p>
                                         </div>
+                                        <div v-else-if="question.question_type === 'multiple_choice' || question.question_type === 'checkbox'">
+                                            <PieChart v-if="Object.keys(question.results).length > 0" :chart-data="formatPieChartData(question.results)" />
+                                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">No responses for this question in this period.</p>
+                                        </div>                        
                                         <div v-else-if="question.question_type === 'text'">
-                                            <ul class="space-y-2 list-disc list-inside text-sm">
-                                                <li v-for="(answer, index) in question.results.slice(0, 5)" :key="index" class="text-gray-600 dark:text-gray-400">{{ answer }}</li>
-                                                <li v-if="question.results.length > 5" class="text-gray-500 dark:text-gray-400 italic">...and {{ question.results.length - 5 }} more.</li>
+                                            <ul v-if="question.results.length > 0" class="space-y-2 list-disc list-inside text-sm">
+                                                <li v-for="(answer, index) in paginatedTextResults(question)" :key="index" class="text-gray-600 dark:text-gray-400">{{ answer }}</li>
                                             </ul>
+                                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">No text responses for this question yet.</p>
+
+                                            <!-- Pagination Controls for Text Responses -->
+                                            <div v-if="question.results.length > itemsPerPage" class="mt-4 flex justify-between items-center text-sm">
+                                                <button @click="changeTextPage(question.id, -1)" :disabled="textQuestionPages[question.id] <= 1" class="font-medium text-indigo-600 dark:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    &larr; Previous
+                                                </button>
+                                                <span class="text-gray-600 dark:text-gray-400">
+                                                    Page {{ textQuestionPages[question.id] }} of {{ totalTextPages(question) }}
+                                                </span>
+                                                <button @click="changeTextPage(question.id, 1)" :disabled="textQuestionPages[question.id] >= totalTextPages(question)" class="font-medium text-indigo-600 dark:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    Next &rarr;
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
