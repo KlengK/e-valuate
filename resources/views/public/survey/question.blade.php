@@ -14,36 +14,44 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* vvv THIS IS THE NEW PART vvv */
-            /* You can replace this URL with your own background image */
             background-image: url("{{ asset('images/background.png') }}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            /* ^^^ END OF NEW PART ^^^ */
         }
-        /* Custom styles for star rating */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
         .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 0.5rem; }
         .star-rating input[type="radio"] { display: none; }
         .star-rating label { cursor: pointer; color: #d1d5db; transition: color 0.2s; }
         .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input[type="radio"]:checked ~ label { color: #f59e0b; }
 
-        /* vvv ADD THIS OVERLAY STYLE vvv */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
-            z-index: -1; /* Place it behind the content */
+        /* vvv SMOOTHER ANIMATION STYLES vvv */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(25px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-15px) scale(0.98); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .fade-out {
+            animation: fadeOut 0.4s ease-in forwards;
+        }
+        /* ^^^ END OF SMOOTHER STYLES ^^^ */
     </style>
 </head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <main id="survey-container" class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-4 sm:p-8">
+    <main id="survey-container" class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-4 sm:p-8 fade-in">
         <header class="text-center mb-6">
             <h1 class="text-xl sm:text-2xl font-bold text-slate-800">{{ $survey->title }}</h1>
         </header>
@@ -63,14 +71,13 @@
             <input type="hidden" name="question_id" value="{{ $question->id }}">
 
             <fieldset>
-                <legend class="text-center text-lg sm:text-xl font-semibold text-slate-800 mb-6">
+                <legend class="text-center text-lg sm:text-xl font-semibold text-slate-800">
                     {{ $question->question_text }}
                     @if(!$question->is_required)
                         <span class="text-base font-normal text-gray-500">(Optional)</span>
                     @endif
                 </legend>
-
-                 @if($question->description)
+                @if($question->description)
                     <p class="text-center text-sm text-gray-500 mt-2 mb-6">{{ $question->description }}</p>
                 @endif
 
@@ -95,8 +102,6 @@
                                 </label>
                             </div>
                         @endforeach
-                    
-                    <!-- vvv THIS IS THE NEW PART vvv -->
                     @elseif ($question->question_type === 'checkbox')
                         @foreach ($question->options as $option)
                             <div class="relative flex items-start">
@@ -108,19 +113,17 @@
                                 </div>
                             </div>
                         @endforeach
-                    <!-- ^^^ END OF NEW PART ^^^ -->
-
                     @endif
                 </div>
             </fieldset>
 
             <div class="mt-8 flex flex-col-reverse sm:flex-row items-center justify-center gap-4">
                 @if ($question->order > 1)
-                    <a href="{{ route('public.survey.question.show', ['session_uuid' => $session_uuid, 'order' => $question->order - 1]) }}" class="w-full sm:w-auto text-center font-bold text-lg py-3 px-8 sm:px-12 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors duration-300">
+                    <a href="{{ route('public.survey.question.show', ['session_uuid' => $session_uuid, 'order' => $question->order - 1]) }}" class="w-full sm:w-auto text-center font-bold text-lg py-3 px-8 sm:px-12 rounded-lg text-slate-600 hover:bg-slate-100">
                         Previous
                     </a>
                 @endif
-                <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white font-bold text-lg py-3 px-8 sm:px-12 rounded-lg hover:bg-indigo-700 transition-colors duration-300">
+                <button type="submit" class="w-full sm:w-auto bg-[#1AADF3] text-white font-bold text-lg py-3 px-8 sm:px-12 rounded-lg hover:bg-[#1798D1] transition-colors duration-300">
                     @if ($question->order == $totalQuestions)
                         Finish Survey
                     @else
@@ -131,5 +134,55 @@
         </form>
     </main>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('question-form');
+            const container = document.getElementById('survey-container');
+            let isSubmitting = false;
+
+            function submitWithAnimation() {
+                if (isSubmitting) return;
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                isSubmitting = true;
+                form.querySelectorAll('input, textarea, button, a').forEach(el => el.style.pointerEvents = 'none');
+                container.classList.remove('fade-in');
+                container.classList.add('fade-out');
+
+                setTimeout(() => {
+                    const formData = new FormData(form);
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    }).then(response => {
+                        if (response.ok && response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            window.location.reload();
+                        }
+                    }).catch(error => {
+                        console.error('Network Error:', error);
+                        window.location.reload();
+                    });
+                }, 400); // Must match the fadeOut animation duration
+            }
+
+            // The auto-submit functionality has been completely removed.
+            // All questions will now use the main submit button.
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                submitWithAnimation();
+            });
+        });
+    </script>
 </body>
 </html>

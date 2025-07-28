@@ -43,6 +43,7 @@ Route::get('/dashboard', DashboardController::class)
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Survey Management
+    Route::delete('/surveys/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
     Route::post('/surveys/{survey}/duplicate', [SurveyController::class, 'duplicate'])->name('surveys.duplicate');
     Route::get('/surveys/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
     Route::put('/surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update');

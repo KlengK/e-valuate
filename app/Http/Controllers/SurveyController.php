@@ -310,6 +310,18 @@ class SurveyController extends Controller
         return Redirect::route('surveys.show', $survey)->with('success', 'Survey updated successfully.');
     }
 
+        public function destroy(Survey $survey): RedirectResponse
+    {
+        // Ensure the logged-in user owns this survey
+        if ($survey->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $survey->delete();
+
+        return Redirect::route('surveys.index')->with('success', 'Survey deleted successfully.');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
