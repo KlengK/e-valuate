@@ -2,19 +2,48 @@ e-VALuate: Customer Satisfaction Survey System
 e-VALuate is a modern, gamified survey management system designed for the Valenzuela City Public Library. It provides a simple and engaging way for patrons to give feedback while offering powerful creation and analytics tools for library staff.
 
 ✨ Features
-Admin Dashboard: A secure, Vue.js-powered single-page application for managing surveys.
+Admin Dashboard
+Comprehensive Dashboard: Get an at-a-glance overview of key metrics, including total surveys, active surveys, responses today, and total responses.
 
-Unified Survey & Question Creation: Create a survey and all its questions on a single, dynamic form.
+Dynamic UI: A secure, Vue.js-powered single-page application for managing surveys.
 
-Survey Status Control: Easily manage the lifecycle of surveys by switching them between Draft, Active, and Closed states.
+Dark Mode: A beautiful, consistent dark theme across the entire admin panel.
 
-Gamified Public Surveys: A mobile-first, one-question-per-page experience for patrons with progress bars and a clean UI.
+Mobile Responsive: The admin dashboard is fully responsive for management on the go.
 
-Multiple Question Types: Supports star ratings, open-text answers, and multiple-choice questions.
+Survey Management
+Unified Survey & Question Creation: Create a survey and all its questions, descriptions, and settings on a single, dynamic form.
 
-Shareable Links & QR Codes: Generate shareable URLs and downloadable QR codes for each survey to use on flyers and posters.
+Full Editing Capability: Edit a survey's title, description, and dynamically add, remove, or modify questions after creation.
 
-Results & Analytics: A dedicated reporting page for each survey showing total completions and a breakdown of answers per question.
+Duplicate Surveys: Instantly create a copy of an existing survey and its questions with a single click.
+
+Secure Deletion: A confirmation modal ensures surveys and all their associated data are not deleted accidentally.
+
+Status Control: Easily manage the lifecycle of surveys by switching them between Draft, Active, and Closed states.
+
+Question Types & Customization
+Multiple Question Types: Supports Star Ratings, Open Text, Multiple Choice (single answer), and Checkboxes (multiple answers).
+
+Optional Descriptions: Add optional descriptions to each question for extra context.
+
+Required/Optional Toggle: A user-friendly toggle switch for each question to specify whether an answer is required.
+
+Reporting & Analytics
+Tabbed Report Interface: View aggregated "Summary" data or browse through "Individual" responses one by one with pagination.
+
+Data Visualization: Multiple-choice and checkbox question results are automatically rendered as interactive pie charts.
+
+Exporting: Export the summary report to either CSV or PDF format for offline analysis and record-keeping.
+
+Public Survey Experience
+Gamified Interface: A mobile-first, one-question-per-page experience for patrons.
+
+Engaging UI: Features a custom background, progress bar, and smooth fade-in/fade-out transitions between questions.
+
+Rewarding Completion: A celebratory confetti animation is displayed on the "Thank You" page.
+
+Shareable Links & QR Codes: Generate shareable URLs and downloadable QR codes (with a merged logo) for each survey.
 
 🛠️ Tech Stack
 Backend: PHP, Laravel
@@ -25,29 +54,14 @@ Database: MySQL
 
 Development Environment: Laravel Herd
 
-Production Server: Ubuntu, Apache2
-
-📋 Prerequisites
-Before you begin, ensure you have the following software installed on your local machine:
-
-Laravel Herd (or another local server environment with PHP 8.2+, Composer, and Node.js)
-
-A MySQL database server (included with Herd Pro, or you can use a separate installation like XAMPP or a standalone server).
-
-Git for version control.
+Key Packages: maatwebsite/excel, barryvdh/laravel-dompdf, vue-chartjs, @vueuse/core
 
 🚀 Installation & Setup
-Follow these steps to get your local development environment running.
-
 1. Clone the Repository
-Open your terminal and clone the project to your local machine.
-
 git clone <your-repository-url> e-valuate
 cd e-valuate
 
 2. Install Dependencies
-Install all the required PHP and Node.js packages.
-
 # Install PHP dependencies
 composer install
 
@@ -55,8 +69,6 @@ composer install
 npm install
 
 3. Configure Your Environment
-Create your local environment configuration file and generate an application key.
-
 # Create the .env file from the example
 cp .env.example .env
 
@@ -64,40 +76,19 @@ cp .env.example .env
 php artisan key:generate
 
 4. Set Up the Database
-Open your preferred MySQL client (e.g., DBeaver, MySQL Workbench).
+Create a new, empty MySQL database named e_valuate.
 
-Create a new, empty database named e_valuate.
+Open the .env file and update the database credentials.
 
-Open the .env file in your code editor and update the database credentials:
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=e_valuate
-DB_USERNAME=root
-DB_PASSWORD=
+Update the timezone in config/app.php: 'timezone' => 'Asia/Manila'.
 
 5. Run Database Migrations
-This command will create all the necessary tables in your database.
-
 php artisan migrate
 
-6. Run the Development Server
-Compile the frontend assets and start the Vite development server.
+6. Place Static Assets
+Place your logo at public/images/logo.png and your desired survey background at public/images/background.png.
 
+7. Run the Development Server
 npm run dev
 
-Your Laravel application will be served automatically by Herd at http://e-valuate.test.
-
-📖 Usage Guide
-Navigate to http://e-valuate.test in your browser.
-
-Click the "Register" link to create a new admin account.
-
-After registering, you will be redirected to the dashboard.
-
-Click on the "Surveys" navigation link.
-
-Click "Create Survey" to build your first survey and add its questions.
-
-Once created, you can manage the survey's status, view reports, or generate a shareable link and QR code from the survey list.
+Your application will be available at http://e-valuate.test.
