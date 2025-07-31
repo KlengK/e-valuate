@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         Auth::guard('web')->logout();
 
@@ -47,6 +47,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // vvv THIS IS THE FIX vvv
+        // This tells Inertia to perform a full page visit to the landing page,
+        // which avoids the modal issue.
+        return Inertia::location(url('/'));
+        // ^^^ END OF FIX ^^^
     }
 }
