@@ -1,94 +1,50 @@
-e-VALuate: Customer Satisfaction Survey System
-e-VALuate is a modern, gamified survey management system designed for the Valenzuela City Public Library. It provides a simple and engaging way for patrons to give feedback while offering powerful creation and analytics tools for library staff.
+# e-valuate: Data-Driven Real Estate Valuation Model
 
-✨ Features
-Admin Dashboard
-Comprehensive Dashboard: Get an at-a-glance overview of key metrics, including total surveys, active surveys, responses today, and total responses.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.x-yellow.svg)
+![Algorithm](https://img.shields.io/badge/Algorithm-Multiple_Linear_Regression-orange)
+![Status](https://img.shields.io/badge/Status-Graduate_Thesis-success)
 
-Dynamic UI: A secure, Vue.js-powered single-page application for managing surveys.
+> **Academic Note:** This repository contains the source code, datasets, and predictive models for the graduate thesis titled *"Data-Driven Valuation: A Price Prediction Model for Residential and Condominium Properties."*
 
-Dark Mode: A beautiful, consistent dark theme across the entire admin panel.
+## 📖 Project Abstract
 
-Mobile Responsive: The admin dashboard is fully responsive for management on the go.
+**e-valuate** is a predictive analytics tool designed to estimate the market value of residential and condominium properties. By leveraging historical real estate data and applying **Multiple Linear Regression (MLR)**, this project aims to provide a data-driven alternative to traditional, subjective appraisal methods.
 
-Survey Management
-Unified Survey & Question Creation: Create a survey and all its questions, descriptions, and settings on a single, dynamic form.
+The system analyzes key independent variables (e.g., floor area, location, number of bedrooms, building age) to generate a predicted market price with statistical significance.
 
-Full Editing Capability: Edit a survey's title, description, and dynamically add, remove, or modify questions after creation.
+## 🎯 Key Objectives
 
-Duplicate Surveys: Instantly create a copy of an existing survey and its questions with a single click.
+* **Predictive Accuracy:** Develop a regression model that minimizes the error between predicted and actual property prices.
+* **Market Insight:** Identify which attributes (variables) have the highest correlation with property value.
+* **Decision Support:** Provide a tool for stakeholders (buyers, sellers, agents) to assess fair market value based on quantitative data.
 
-Secure Deletion: A confirmation modal ensures surveys and all their associated data are not deleted accidentally.
+## ⚙️ Methodology & Tech Stack
 
-Status Control: Easily manage the lifecycle of surveys by switching them between Draft, Active, and Closed states.
+This project follows the **CRISP-DM** (Cross-Industry Standard Process for Data Mining) methodology:
 
-Question Types & Customization
-Multiple Question Types: Supports Star Ratings, Open Text, Multiple Choice (single answer), and Checkboxes (multiple answers).
+* **Language:** Python
+* **Data Manipulation:** Pandas, NumPy
+* **Machine Learning:** Scikit-learn (LinearRegression model)
+* **Visualization:** Matplotlib, Seaborn
+* **Environment:** Jupyter Notebook / Google Colab
 
-Optional Descriptions: Add optional descriptions to each question for extra context.
+### The Algorithm: Multiple Linear Regression
+The core model attempts to fit a linear equation to observed data:
+$$Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + ... + \beta_nX_n + \epsilon$$
 
-Required/Optional Toggle: A user-friendly toggle switch for each question to specify whether an answer is required.
+Where:
+* $Y$ = Predicted Price
+* $X_1, X_2...$ = Property Features (Size, Location, Amenities)
 
-Reporting & Analytics
-Tabbed Report Interface: View aggregated "Summary" data or browse through "Individual" responses one by one with pagination.
+## 📊 Model Performance
 
-Data Visualization: Multiple-choice and checkbox question results are automatically rendered as interactive pie charts.
+*(Update these values with your actual thesis results)*
 
-Exporting: Export the summary report to either CSV or PDF format for offline analysis and record-keeping.
+| Metric | Score | Description |
+| :--- | :--- | :--- |
+| **R-squared ($R^2$)** | **0.XX** | Explains XX% of the variance in property prices. |
+| **RMSE** | **₱XXX,XXX** | Root Mean Square Error (average deviation). |
+| **MAE** | **₱XXX,XXX** | Mean Absolute Error. |
 
-Public Survey Experience
-Gamified Interface: A mobile-first, one-question-per-page experience for patrons.
-
-Engaging UI: Features a custom background, progress bar, and smooth fade-in/fade-out transitions between questions.
-
-Rewarding Completion: A celebratory confetti animation is displayed on the "Thank You" page.
-
-Shareable Links & QR Codes: Generate shareable URLs and downloadable QR codes (with a merged logo) for each survey.
-
-🛠️ Tech Stack
-Backend: PHP, Laravel
-
-Frontend: Vue.js, Inertia.js, Tailwind CSS
-
-Database: MySQL
-
-Development Environment: Laravel Herd
-
-Key Packages: maatwebsite/excel, barryvdh/laravel-dompdf, vue-chartjs, @vueuse/core
-
-🚀 Installation & Setup
-1. Clone the Repository
-git clone <your-repository-url> e-valuate
-cd e-valuate
-
-2. Install Dependencies
-# Install PHP dependencies
-composer install
-
-# Install Node.js dependencies
-npm install
-
-3. Configure Your Environment
-# Create the .env file from the example
-cp .env.example .env
-
-# Generate a new application key
-php artisan key:generate
-
-4. Set Up the Database
-Create a new, empty MySQL database named e_valuate.
-
-Open the .env file and update the database credentials.
-
-Update the timezone in config/app.php: 'timezone' => 'Asia/Manila'.
-
-5. Run Database Migrations
-php artisan migrate
-
-6. Place Static Assets
-Place your logo at public/images/logo.png and your desired survey background at public/images/background.png.
-
-7. Run the Development Server
-npm run dev
-
-Your application will be available at http://e-valuate.test.
+## 📂 Repository Structure
