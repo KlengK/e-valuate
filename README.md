@@ -1,94 +1,92 @@
-e-VALuate: Customer Satisfaction Survey System
-e-VALuate is a modern, gamified survey management system designed for the Valenzuela City Public Library. It provides a simple and engaging way for patrons to give feedback while offering powerful creation and analytics tools for library staff.
+# e-VALuate: Customer Satisfaction Survey System
 
-✨ Features
-Admin Dashboard
-Comprehensive Dashboard: Get an at-a-glance overview of key metrics, including total surveys, active surveys, responses today, and total responses.
+![Laravel](https://img.shields.io/badge/Backend-Laravel_10-FF2D20)
+![Vue.js](https://img.shields.io/badge/Frontend-Vue.js_3-4FC08D)
+![Inertia](https://img.shields.io/badge/Architecture-Inertia.js-purple)
+![Tailwind](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC)
+![Status](https://img.shields.io/badge/Status-Production_Ready-success)
 
-Dynamic UI: A secure, Vue.js-powered single-page application for managing surveys.
+> **Project Context:** Developed for the **Valenzuela City Public Library**, *e-VALuate* is a modern, gamified survey platform designed to increase patron feedback rates through an engaging mobile-first interface while providing powerful analytics for library administrators.
 
-Dark Mode: A beautiful, consistent dark theme across the entire admin panel.
+## 📖 Project Overview
 
-Mobile Responsive: The admin dashboard is fully responsive for management on the go.
+Traditional library survey forms suffer from low engagement and manual data entry. **e-VALuate** solves this by digitizing the entire feedback loop. It features a **Single-Page Application (SPA)** admin dashboard for creating dynamic surveys and a "gamified" public interface that rewards users with animations upon completion.
 
-Survey Management
-Unified Survey & Question Creation: Create a survey and all its questions, descriptions, and settings on a single, dynamic form.
+Built using the **TALL stack's modern cousin (LIVT: Laravel, Inertia, Vue, Tailwind)**, this application demonstrates a seamless monolith architecture where the frontend and backend are tightly integrated without the complexity of a separate API.
 
-Full Editing Capability: Edit a survey's title, description, and dynamically add, remove, or modify questions after creation.
+## 🚀 Key Features
 
-Duplicate Surveys: Instantly create a copy of an existing survey and its questions with a single click.
+### 🏛️ For Administrators (Dashboard)
+* **Dynamic Survey Builder:** Create surveys with mixed question types (Star Ratings, Multiple Choice, Open Text) and toggle "Required" fields instantly.
+* **Real-Time Analytics:** * Automated **Pie Charts** for multiple-choice data.
+    * Tabbed browsing for individual response auditing.
+    * **PDF & CSV Exports** using `maatwebsite/excel` and `dompdf`.
+* **Survey Lifecycle Management:**
+    * **One-Click Duplication:** Clone existing surveys to save time.
+    * **State Management:** Switch surveys between *Draft*, *Active*, and *Closed*.
+* **Dark Mode UI:** Fully responsive dark/light mode interface built with Tailwind CSS.
 
-Secure Deletion: A confirmation modal ensures surveys and all their associated data are not deleted accidentally.
+### 📱 For Patrons (Public Interface)
+* **Gamified UX:** One-question-per-page flow with smooth transitions to reduce cognitive load.
+* **Visual Feedback:** Custom progress bars and a "Confetti" celebration animation on submission to encourage future participation.
+* **QR Code Integration:** Auto-generates branded QR codes for each active survey for easy lobby scanning.
 
-Status Control: Easily manage the lifecycle of surveys by switching them between Draft, Active, and Closed states.
+## 🛠️ Technical Architecture
 
-Question Types & Customization
-Multiple Question Types: Supports Star Ratings, Open Text, Multiple Choice (single answer), and Checkboxes (multiple answers).
+This project utilizes **Inertia.js** to build a modern Single-Page Application (SPA) using classic server-side routing.
 
-Optional Descriptions: Add optional descriptions to each question for extra context.
+* **Backend:** PHP (Laravel) handles validation, Eloquent relationships, and data export logic.
+* **Frontend:** Vue.js (Composition API) handles the reactive UI, while Inertia acts as the glue to render Vue components directly from Laravel controllers.
+* **Database:** MySQL with a normalized schema for `Surveys` → `Questions` → `Responses`.
+* **State Management:** Minimal client-side state required due to Inertia's seamless data passing.
 
-Required/Optional Toggle: A user-friendly toggle switch for each question to specify whether an answer is required.
+## 📸 Screenshots
 
-Reporting & Analytics
-Tabbed Report Interface: View aggregated "Summary" data or browse through "Individual" responses one by one with pagination.
+| **Admin Dashboard** | **Analytics View** |
+|:-------------------:|:------------------:|
+| *(Place screenshot of dashboard here)* | *(Place screenshot of pie charts here)* |
 
-Data Visualization: Multiple-choice and checkbox question results are automatically rendered as interactive pie charts.
+| **Public Survey Mobile View** | **QR Code Generation** |
+|:-----------------------------:|:----------------------:|
+| *(Place screenshot of phone view here)* | *(Place screenshot of QR code modal here)* |
 
-Exporting: Export the summary report to either CSV or PDF format for offline analysis and record-keeping.
+## 💻 Installation & Setup
 
-Public Survey Experience
-Gamified Interface: A mobile-first, one-question-per-page experience for patrons.
+1.  **Clone the Repository**
+    ```bash
+    git clone [https://github.com/KlengK/e-valuate.git](https://github.com/KlengK/e-valuate.git)
+    cd e-valuate
+    ```
 
-Engaging UI: Features a custom background, progress bar, and smooth fade-in/fade-out transitions between questions.
+2.  **Install Dependencies**
+    ```bash
+    composer install
+    npm install
+    ```
 
-Rewarding Completion: A celebratory confetti animation is displayed on the "Thank You" page.
+3.  **Environment Configuration**
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+    *Update your `.env` file with your MySQL database credentials.*
 
-Shareable Links & QR Codes: Generate shareable URLs and downloadable QR codes (with a merged logo) for each survey.
+4.  **Database Migration**
+    ```bash
+    php artisan migrate
+    ```
 
-🛠️ Tech Stack
-Backend: PHP, Laravel
+5.  **Build Assets & Run**
+    ```bash
+    npm run build
+    php artisan serve
+    ```
 
-Frontend: Vue.js, Inertia.js, Tailwind CSS
+## 👤 Author
 
-Database: MySQL
+**[Your Name]**
+*Full Stack Developer*
+*Valenzuela City Library IT Team*
 
-Development Environment: Laravel Herd
-
-Key Packages: maatwebsite/excel, barryvdh/laravel-dompdf, vue-chartjs, @vueuse/core
-
-🚀 Installation & Setup
-1. Clone the Repository
-git clone <your-repository-url> e-valuate
-cd e-valuate
-
-2. Install Dependencies
-# Install PHP dependencies
-composer install
-
-# Install Node.js dependencies
-npm install
-
-3. Configure Your Environment
-# Create the .env file from the example
-cp .env.example .env
-
-# Generate a new application key
-php artisan key:generate
-
-4. Set Up the Database
-Create a new, empty MySQL database named e_valuate.
-
-Open the .env file and update the database credentials.
-
-Update the timezone in config/app.php: 'timezone' => 'Asia/Manila'.
-
-5. Run Database Migrations
-php artisan migrate
-
-6. Place Static Assets
-Place your logo at public/images/logo.png and your desired survey background at public/images/background.png.
-
-7. Run the Development Server
-npm run dev
-
-Your application will be available at http://e-valuate.test.
+---
+*© 2026 Valenzuela City Public Library*
